@@ -1,19 +1,24 @@
+// Import the Field type definition from the central types file
 import type { Field } from "../types";
 
+// Define the structure of a saved template stored in localStorage
 interface SavedTemplate {
   id: string;
   title: string;
   fields: Field[];
 }
 
-// Helper to convert array of strings to array of FieldOption objects
+// Utility function to convert a list of strings into FieldOption objects
+// (e.g. ["Yes", "No"] → [{ label: "Yes", value: "yes" }, ...])
 const toFieldOptions = (options: string[]) =>
   options.map((opt) => ({
     label: opt,
-    value: opt.toLowerCase().replace(/\s+/g, "_"),
+    value: opt.toLowerCase().replace(/\s+/g, "_"), // lowercase + spaces to underscores for value
   }));
 
+// Main function to return fields based on a given template ID
 export const getTemplateFields = (templateId: string): Field[] => {
+  // Define built-in templates as an object with template ID keys
   const builtInTemplates: Record<string, Field[]> = {
     feedback: [
       { id: "1", type: "header", label: "Feedback Form", required: false },
@@ -24,7 +29,7 @@ export const getTemplateFields = (templateId: string): Field[] => {
         type: "dropdown",
         label: "How was your experience?",
         required: true,
-        options: toFieldOptions(["Excellent", "Good", "Average", "Poor"]),
+        options: toFieldOptions(["Excellent", "Good", "Average", "Poor"]), // options mapped using helper
       },
       {
         id: "5",
@@ -68,11 +73,17 @@ export const getTemplateFields = (templateId: string): Field[] => {
     ],
   };
 
+  // First check if the given templateId is one of the built-in templates
   if (templateId in builtInTemplates) {
-    return builtInTemplates[templateId];
+    return builtInTemplates[templateId]; // Return built-in fields if matched
   }
 
+  // If not built-in, check localStorage for saved custom templates
   const savedTemplates: SavedTemplate[] = JSON.parse(localStorage.getItem("templates") || "[]");
+
+  // Try to find the matching custom template
   const found = savedTemplates.find((t) => t.id === templateId);
+
+  // Return its fields if found, or empty array if not
   return found?.fields || [];
 };

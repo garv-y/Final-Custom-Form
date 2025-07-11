@@ -1,48 +1,53 @@
 /* Light mode (default) */
 body.light-mode {
-  background-color: #ffffff;
-  color: #000000;
+  background-color: #ffffff; /* White background for light mode */
+  color: #000000; /* Black text for good contrast */
 }
 
 /* Dark mode styles */
 body.dark-mode {
-  background-color: #121212;
-  color: #ffffff;
+  background-color: #121212; /* Dark background for dark mode */
+  color: #ffffff; /* Light text for readability */
 }
 
+/* Ensures all headings and text elements are white in dark mode */
 body.dark-mode h1,
 body.dark-mode h2,
 body.dark-mode h5,
 body.dark-mode p,
 body.dark-mode label {
-  color: #ffffff;
+  color: #ffffff; /* Override default heading and text color */
 }
 
+/* Card component styling for dark mode */
 body.dark-mode .card {
-  background-color: #1e1e1e;
-  border-color: #444;
+  background-color: #1e1e1e; /* Slightly lighter than background */
+  border-color: #444; /* Subtle border to separate elements */
 }
 
+/* Input fields and dropdowns in dark mode */
 body.dark-mode .form-control,
 body.dark-mode .form-select {
-  background-color: #2a2a2a;
-  color: #ffffff;
-  border-color: #555;
+  background-color: #2a2a2a; /* Input background in dark mode */
+  color: #ffffff; /* Input text color */
+  border-color: #555; /* Input border color */
 }
 
+/* Outline light button appearance in dark mode */
 body.dark-mode .btn-outline-light {
-  color: #ffffff;
-  border-color: #ffffff;
+  color: #ffffff; /* Text color of the button */
+  border-color: #ffffff; /* Border color matches text */
 }
 
+/* Hover effect for light outline button in dark mode */
 body.dark-mode .btn-outline-light:hover {
-  background-color: #ffffff;
-  color: #000;
+  background-color: #ffffff; /* Invert to white background */
+  color: #000; /* And dark text */
 }
 
+/* Custom utility class for soft dark background used on cards/sections */
 .bg-dark-soft {
-  background-color: oklab(24.354% 0 -0.00003) !important;
-  color: #fff !important;
-  border-color: #444 !important;
+  background-color: oklab(24.354% 0 -0.00003) !important; /* Soft dark tone */
+  color: #fff !important; /* Force text to be white */
+  border-color: #444 !important; /* Consistent with dark theme borders */
 }
-

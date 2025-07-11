@@ -1,16 +1,17 @@
-// src/components/Trash.tsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "./ThemeContext";
 
+// Trash Page – handles viewing/restoring/deleting soft-deleted forms and templates
 const Trash: React.FC = () => {
-  const { theme, toggleTheme } = useTheme(); // ✅ Include toggleTheme here
-
+  const { theme, toggleTheme } = useTheme(); // Theme hook with toggle
   const navigate = useNavigate();
 
+  // State for deleted forms and templates
   const [forms, setForms] = useState<any[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
 
+  // On mount, load all deleted forms and templates from localStorage
   useEffect(() => {
     const allForms = JSON.parse(localStorage.getItem("recentForms") || "[]");
     setForms(allForms.filter((f: any) => f.isDeleted));
@@ -19,6 +20,7 @@ const Trash: React.FC = () => {
     setTemplates(allTemplates.filter((t: any) => t.isDeleted));
   }, []);
 
+  // Restore a deleted form by updating its isDeleted flag
   const restoreForm = (id: number) => {
     const all = JSON.parse(localStorage.getItem("recentForms") || "[]");
     const updated = all.map((f: any) =>
@@ -28,6 +30,7 @@ const Trash: React.FC = () => {
     setForms(updated.filter((f: any) => f.isDeleted));
   };
 
+  // Permanently delete a form from localStorage
   const deleteFormPermanently = (id: number) => {
     const all = JSON.parse(localStorage.getItem("recentForms") || "[]");
     const updated = all.filter((f: any) => f.id !== id);
@@ -35,6 +38,7 @@ const Trash: React.FC = () => {
     setForms(updated.filter((f: any) => f.isDeleted));
   };
 
+  // Restore a deleted template
   const restoreTemplate = (id: string) => {
     const all = JSON.parse(localStorage.getItem("templates") || "[]");
     const updated = all.map((t: any) =>
@@ -44,6 +48,7 @@ const Trash: React.FC = () => {
     setTemplates(updated.filter((t: any) => t.isDeleted));
   };
 
+  // Permanently delete a template
   const deleteTemplatePermanently = (id: string) => {
     const all = JSON.parse(localStorage.getItem("templates") || "[]");
     const updated = all.filter((t: any) => t.id !== id);
@@ -54,9 +59,10 @@ const Trash: React.FC = () => {
   return (
     <div
       className={`container py-4 min-vh-100 ${
-        theme === "dark" ? "bg-dark text-white" : "bg-light text-dark"
+        theme === "dark" ? "bg-dark-soft text-white" : "bg-light text-dark"
       }`}
     >
+      {/* Header with Title and Navigation Buttons */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Trash</h2>
         <div className="d-flex gap-2 ms-auto">
@@ -79,13 +85,12 @@ const Trash: React.FC = () => {
         </div>
       </div>
 
+      {/* Section: Deleted Templates */}
       <h4 className="mb-3">Deleted Templates</h4>
       {templates.length === 0 ? (
         <div
           className={`alert ${
-            theme === "dark"
-              ? "bg-dark-soft text-light border-dark"
-              : "alert-light"
+            theme === "dark" ? "bg-dark text-light border-dark" : "alert-light"
           }`}
         >
           No deleted Templates.
@@ -96,7 +101,7 @@ const Trash: React.FC = () => {
             <div className="col-md-4 mb-3" key={t.id}>
               <div
                 className={`card h-100 ${
-                  theme === "dark" ? "bg-dark-soft text-white" : ""
+                  theme === "dark" ? "bg-dark text-white" : ""
                 }`}
               >
                 <div className="card-body">
@@ -124,13 +129,12 @@ const Trash: React.FC = () => {
 
       <hr className="my-5" />
 
+      {/* Section: Deleted Forms */}
       <h4 className="mb-3">Deleted Forms</h4>
       {forms.length === 0 ? (
         <div
           className={`alert ${
-            theme === "dark"
-              ? "bg-dark-soft text-light border-dark"
-              : "alert-light"
+            theme === "dark" ? "bg-dark text-light border-dark" : "alert-light"
           }`}
         >
           No deleted forms.
@@ -141,7 +145,7 @@ const Trash: React.FC = () => {
             <div className="col-md-4 mb-3" key={form.id}>
               <div
                 className={`card h-100 ${
-                  theme === "dark" ? "bg-dark-soft text-white" : ""
+                  theme === "dark" ? "bg-dark text-white" : ""
                 }`}
               >
                 <div className="card-body">

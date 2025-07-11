@@ -1,15 +1,17 @@
-// src/components/FieldRenderer.tsx
+// Component to render different types of form fields dynamically
 import React from "react";
 import type { Field } from "../types";
 
+// Props accepted by FieldRenderer
 interface FieldRendererProps {
-  field: Field;
-  value?: string | string[];
-  onChange: (value: string | string[]) => void;
-  error?: boolean;
-  darkMode?: boolean;
+  field: Field; // Field configuration (type, label, options, etc.)
+  value?: string | string[]; // Current value or values (for checkboxes/tags)
+  onChange: (value: string | string[]) => void; // Callback when input changes
+  error?: boolean; // Whether the field is in an error state (required but empty)
+  darkMode?: boolean; // Optional: future enhancement for styling
 }
 
+// Component for rendering a form field based on its type
 const FieldRenderer: React.FC<FieldRendererProps> = ({
   field,
   value,
@@ -18,36 +20,40 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
 }) => {
   const { label } = field;
 
+  // Function to render error message if the field is required and left empty
   const renderError = () =>
     error && <small className="text-danger">This field is required.</small>;
 
+  // Classes used by inputs to show validation UI
   const baseInputClass = `form-control ${error ? "is-invalid" : ""}`;
   const borderCheckClass = `${error ? "border border-danger" : ""}`;
 
+  // Main switch block that renders field based on its type
   switch (field.type) {
     case "header":
       return (
         <div className="mb-3">
-          <h4>{value || label}</h4>
+          <h4>{value || label}</h4> {/* Header text only */}
         </div>
       );
 
     case "label":
       return (
         <div className="mb-3">
-          <label className="form-label fw-bold">{value || label}</label>
+          <label className="form-label fw-bold">{value || label}</label>{" "}
+          {/* Static label */}
         </div>
       );
 
     case "paragraph":
       return (
         <div className="mb-3">
-          <p>{value || label}</p>
+          <p>{value || label}</p> {/* Informative paragraph */}
         </div>
       );
 
     case "linebreak":
-      return <hr />;
+      return <hr />; // Visual separator, no input
 
     case "text":
       return (
@@ -132,7 +138,7 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
               <input
                 className={`form-check-input ${borderCheckClass}`}
                 type="radio"
-                name={`field-${field.id}`}
+                name={`field-${field.id}`} // Grouping radios by field ID
                 value={opt.value}
                 checked={value === opt.value}
                 onChange={() => onChange(opt.value)}
@@ -178,7 +184,7 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
       );
 
     default:
-      return null;
+      return null; // For unsupported types (should not occur)
   }
 };
 

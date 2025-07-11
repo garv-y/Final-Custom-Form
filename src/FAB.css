@@ -1,50 +1,55 @@
-/* src/components/FAB.css */
+/* Container for the FAB (Floating Action Button) – fixed to bottom-right corner of screen */
 .fab-container {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 1000;
+  position: fixed;        /* Sticks the FAB to a fixed position on screen */
+  bottom: 24px;           /* Distance from the bottom of the viewport */
+  right: 24px;            /* Distance from the right side */
+  z-index: 1000;          /* Ensures it's above most other UI elements */
 }
 
+/* The main round FAB button */
 .fab-main {
-  width: 56px;
+  width: 56px;            /* Standard FAB size */
   height: 56px;
-  border-radius: 50%;
-  background-color: #007bff;
-  color: white;
-  font-size: 24px;
-  border: none;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  cursor: pointer;
-  transition: background-color 0.3s;
+  border-radius: 50%;     /* Makes it perfectly round */
+  background-color: #007bff; /* Bootstrap primary color */
+  color: white;           /* White icon/text */
+  font-size: 24px;        /* Large plus (+) icon or text */
+  border: none;           /* No default border */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Subtle shadow for depth */
+  cursor: pointer;        /* Pointer cursor on hover */
+  transition: background-color 0.3s; /* Smooth color transition on hover */
 }
 
+/* FAB hover effect – darkens the blue */
 .fab-main:hover {
-  background-color: #0056b3;
+  background-color: #0056b3; /* Darker shade of primary blue */
 }
 
+/* Popup menu that appears above the FAB */
 .fab-menu {
-  position: absolute;
-  bottom: 70px;
+  position: absolute;     /* Positioned relative to .fab-container */
+  bottom: 70px;           /* Offset above the main FAB */
   right: 0;
-  background: white;
-  border-radius: 8px;
-  padding: 10px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  background: white;      /* White background for contrast */
+  border-radius: 8px;     /* Rounded corners for soft appearance */
+  padding: 10px;          /* Inner spacing */
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15); /* Elevated shadow for depth */
 }
 
+/* Individual item/button inside the FAB menu */
 .fab-item {
-  display: block;
+  display: block;         /* Takes full width of container */
   width: 100%;
-  padding: 6px 10px;
-  background: none;
-  border: none;
-  text-align: left;
-  cursor: pointer;
-  color: #333;
-  transition: background 0.2s;
+  padding: 6px 10px;      /* Inner spacing for click area */
+  background: none;       /* No background by default */
+  border: none;           /* Remove button border */
+  text-align: left;       /* Align text to left */
+  cursor: pointer;        /* Pointer cursor on hover */
+  color: #333;            /* Dark gray text */
+  transition: background 0.2s; /* Smooth background change on hover */
 }
 
+/* Hover effect for FAB menu item */
 .fab-item:hover {
-  background-color: #f0f0f0;
+  background-color: #f0f0f0; /* Light gray background on hover */
 }

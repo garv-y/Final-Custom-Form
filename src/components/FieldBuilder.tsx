@@ -19,14 +19,14 @@ const FieldBuilder: React.FC<Props> = ({ field, updateField, deleteField }) => {
 
   const handleOptionChange = (index: number, value: string) => {
     const options = [...(field.options || [])];
-    options[index] = { text: value };
+    options[index] = { label: value, value };
     updateField({ ...field, options });
   };
 
   const addOption = () =>
     updateField({
       ...field,
-      options: [...(field.options || []), { text: "Option" }],
+      options: [...(field.options || []), { label: "Option", value: "Option" }],
     });
 
   const deleteOption = (index: number) => {
@@ -66,7 +66,7 @@ const FieldBuilder: React.FC<Props> = ({ field, updateField, deleteField }) => {
                 className={`form-control ${
                   theme === "dark" ? "bg-dark text-white border-secondary" : ""
                 }`}
-                value={opt.text}
+                value={opt.label}
                 onChange={(e) => handleOptionChange(i, e.target.value)}
               />
               <button

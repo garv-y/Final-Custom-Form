@@ -6,6 +6,7 @@ import FormView from "./components/FormView";
 import { ThemeProvider } from "./components/ThemeContext";
 import TemplateForm from "./components/TemplateForm";
 import Trash from "./components/Trash";
+import TemplateView from "./components/TemplateView";
 
 const App: React.FC = () => {
   return (
@@ -16,6 +17,7 @@ const App: React.FC = () => {
           <Route path="/form-builder" element={<FormBuilder />} />
           <Route path="/view/:id" element={<FormView />} />
           <Route path="/template/:id" element={<TemplateForm />} />
+          <Route path="/template-view/:id" element={<TemplateView />} />
           <Route path="/trash" element={<Trash />} />
         </Routes>
       </Router>

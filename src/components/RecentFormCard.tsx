@@ -3,16 +3,26 @@ import { useTheme } from "./ThemeContext";
 
 interface RecentFormCardProps {
   form: {
-    id: number;
+    id: string;
     title: string;
     timestamp: string;
-    data: Record<number, string | string[]>;
+    data: Record<string, string | string[]>;
+    fields: any[]; // Optional: replace with Field[] if you have a type
+    isDeleted?: boolean;
   };
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
 }
 
 const RecentFormCard: React.FC<RecentFormCardProps> = ({ form, onDelete }) => {
   const { theme } = useTheme();
+
+  let formattedDate = "Unknown";
+  if (form.timestamp) {
+    const parsed = new Date(form.timestamp);
+    if (!isNaN(parsed.getTime())) {
+      formattedDate = parsed.toLocaleString();
+    }
+  }
 
   return (
     <div
@@ -32,8 +42,33 @@ const RecentFormCard: React.FC<RecentFormCardProps> = ({ form, onDelete }) => {
             theme === "dark" ? "text-light" : "text-muted"
           } small`}
         >
-          Submitted on: {new Date(form.timestamp).toLocaleString()}
+          Submitted on: {formattedDate}
         </p>
+
+        {form.data && Object.keys(form.data).length > 0 && (
+          <div
+            className={`p-2 rounded mb-2 ${
+              theme === "dark"
+                ? "bg-dark-subtle text-light border border-secondary"
+                : "bg-light text-dark border border-light"
+            }`}
+          >
+            <h6 className="mb-2 fw-semibold">Submitted Data:</h6>
+            <pre
+              className="m-0"
+              style={{
+                whiteSpace: "pre-wrap",
+                fontSize: "0.85rem",
+                backgroundColor: theme === "dark" ? "#1f1f1f" : "#f8f9fa",
+                padding: "0.75rem",
+                borderRadius: "6px",
+              }}
+            >
+              {JSON.stringify(form.data, null, 2)}
+            </pre>
+          </div>
+        )}
+
         <div className="d-flex justify-content-between">
           <a
             href={`/view/${form.id}`}

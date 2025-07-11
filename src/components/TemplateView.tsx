@@ -1,27 +1,29 @@
+// src/components/TemplateView.tsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useTheme } from "../components/ThemeContext";
+import { useTheme } from "./ThemeContext";
 
-interface FormData {
+interface SubmittedTemplate {
   id: string;
   title: string;
-  timestamp?: string;
-  responses?: Record<string, string | string[]>; // ✅ Add this
-  fields?: any[]; // Optional, depends on your usage
-  isDeleted?: boolean;
+  submittedAt: string;
+  responses: Record<string, string | string[]>;
+  fields: any[];
 }
 
-const FormView: React.FC = () => {
+const TemplateView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
-  const [form, setForm] = useState<FormData | null>(null);
+  const [form, setForm] = useState<SubmittedTemplate | null>(null);
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("recentForms") || "[]");
-    const matchedForm = saved.find((f: FormData) => f.id.toString() === id);
-    setForm(matchedForm || null);
+    const saved = JSON.parse(
+      localStorage.getItem("submittedTemplates") || "[]"
+    );
+    const match = saved.find((f: SubmittedTemplate) => f.id === id);
+    setForm(match || null);
   }, [id]);
 
   if (!form) {
@@ -31,21 +33,12 @@ const FormView: React.FC = () => {
           theme === "dark" ? "bg-dark text-white" : ""
         }`}
       >
-        <h3>Form not found</h3>
+        <h3>Template not found</h3>
         <button onClick={() => navigate("/")} className="btn btn-dark mt-3">
           Back to Dashboard
         </button>
       </div>
     );
-  }
-
-  // ✅ Safe timestamp formatting
-  let formattedDate = "Unknown";
-  if (form.timestamp) {
-    const parsed = new Date(form.timestamp);
-    if (!isNaN(parsed.getTime())) {
-      formattedDate = parsed.toLocaleString();
-    }
   }
 
   return (
@@ -54,7 +47,6 @@ const FormView: React.FC = () => {
         theme === "dark" ? "bg-dark text-white" : ""
       }`}
     >
-      {/* Header Buttons */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="m-0">{form.title}</h2>
         <div className="d-flex gap-2">
@@ -78,7 +70,10 @@ const FormView: React.FC = () => {
       </div>
 
       <p>
-        <strong>Submission Time:</strong> {formattedDate}
+        <strong>Submission Time:</strong>{" "}
+        {form.submittedAt
+          ? new Date(form.submittedAt).toLocaleString()
+          : "Unknown"}
       </p>
 
       <div className="mt-4">
@@ -88,22 +83,11 @@ const FormView: React.FC = () => {
             theme === "dark" ? "bg-dark text-white" : "bg-light text-dark"
           }`}
         >
-          {form.responses && Object.keys(form.responses).length > 0 ? (
-            <ul className="list-group">
-              {Object.entries(form.responses).map(([label, val]) => (
-                <li key={label} className="list-group-item">
-                  <strong>{label}: </strong>
-                  {Array.isArray(val) ? val.join(", ") : val}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>No responses submitted.</p>
-          )}
+          {JSON.stringify(form.responses, null, 2)}
         </pre>
       </div>
     </div>
   );
 };
 
-export default FormView;
+export default TemplateView;

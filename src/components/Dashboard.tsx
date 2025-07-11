@@ -17,10 +17,22 @@ interface SavedTemplate {
   isDeleted?: boolean;
 }
 
+interface SubmittedTemplate {
+  id: string;
+  title: string;
+  submittedAt: string;
+  responses: Record<string, string | string[]>;
+  fields: any[];
+  isDeleted?: boolean;
+}
+
 const Dashboard: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const [recentForms, setRecentForms] = useState<RecentForm[]>([]);
   const [savedTemplates, setSavedTemplates] = useState<SavedTemplate[]>([]);
+  const [submittedTemplates, setSubmittedTemplates] = useState<
+    SubmittedTemplate[]
+  >([]);
 
   useEffect(() => {
     const forms = JSON.parse(localStorage.getItem("recentForms") || "[]");
@@ -46,6 +58,19 @@ const Dashboard: React.FC = () => {
     );
     localStorage.setItem("templates", JSON.stringify(updated));
     setSavedTemplates(updated.filter((t: SavedTemplate) => !t.isDeleted));
+  };
+
+  const softDeleteSubmission = (id: string) => {
+    const submissions = JSON.parse(
+      localStorage.getItem("submittedTemplates") || "[]"
+    );
+    const updated = submissions.map((s: SubmittedTemplate) =>
+      s.id === id ? { ...s, isDeleted: true } : s
+    );
+    localStorage.setItem("submittedTemplates", JSON.stringify(updated));
+    setSubmittedTemplates(
+      updated.filter((s: SubmittedTemplate) => !s.isDeleted)
+    );
   };
 
   const defaultTemplates = [
@@ -149,6 +174,50 @@ const Dashboard: React.FC = () => {
                       <button
                         className="btn btn-sm btn-outline-danger"
                         onClick={() => softDeleteTemplate(template.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Submitted Templates */}
+      {submittedTemplates.length > 0 && (
+        <>
+          <h4 className="mt-5 mb-4">Submitted Templates</h4>
+          <div className="row">
+            {submittedTemplates.map((submission) => (
+              <div className="col-md-4 mb-4" key={submission.id}>
+                <div
+                  className={`card h-100 shadow-sm border-0 ${
+                    theme === "dark"
+                      ? "bg-dark-soft text-white"
+                      : "bg-white text-dark"
+                  }`}
+                >
+                  <div className="card-body d-flex flex-column justify-content-between">
+                    <div>
+                      <h5 className="card-title">{submission.title}</h5>
+                      <p className="card-text">
+                        Submitted at:{" "}
+                        {new Date(submission.submittedAt).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="d-flex justify-content-between mt-3">
+                      <Link
+                        to={`/submission/${submission.id}`}
+                        className="btn btn-sm btn-outline-primary"
+                      >
+                        View
+                      </Link>
+                      <button
+                        className="btn btn-sm btn-outline-danger"
+                        onClick={() => softDeleteSubmission(submission.id)}
                       >
                         Delete
                       </button>

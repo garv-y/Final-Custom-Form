@@ -1,3 +1,4 @@
+// src/components/TemplateForm.tsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import FieldRenderer from "./FieldRenderer";
@@ -23,6 +24,7 @@ const TemplateForm: React.FC = () => {
   const [submittedData, setSubmittedData] = useState<
     Record<string, string | string[]>
   >({});
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [showAlert, setShowAlert] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [templateSaved, setTemplateSaved] = useState(false);
@@ -34,7 +36,7 @@ const TemplateForm: React.FC = () => {
           ...field,
           id: String(field.id),
           options: field.options?.map((opt: any) =>
-            typeof opt === "string" ? { text: opt } : opt
+            typeof opt === "string" ? { label: opt, value: opt } : opt
           ) as FieldOption[],
         })
       );
@@ -47,21 +49,42 @@ const TemplateForm: React.FC = () => {
 
   const handleInputChange = (fieldId: string, value: string | string[]) => {
     setSubmittedData((prev) => ({ ...prev, [fieldId]: value }));
+    setErrors((prev) => ({ ...prev, [fieldId]: false })); // Clear error on change
   };
 
   const handleSubmit = () => {
+    const newErrors: Record<string, boolean> = {};
+
+    fields.forEach((field) => {
+      if (field.required) {
+        const val = submittedData[field.id];
+        const isEmpty =
+          val === undefined ||
+          val === "" ||
+          (Array.isArray(val) && val.length === 0);
+        if (isEmpty) newErrors[field.id] = true;
+      }
+    });
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) return;
+
     const formSubmission = {
       id: Date.now().toString(),
       title: formTitle,
       timestamp: new Date().toISOString(),
-      data: submittedData,
+      responses: submittedData,
       fields,
+      isDeleted: false,
     };
 
-    const saved = JSON.parse(localStorage.getItem("recentForms") || "[]");
+    const existingForms = JSON.parse(
+      localStorage.getItem("recentForms") || "[]"
+    );
     localStorage.setItem(
       "recentForms",
-      JSON.stringify([formSubmission, ...saved])
+      JSON.stringify([formSubmission, ...existingForms])
     );
 
     setShowAlert(true);
@@ -76,7 +99,10 @@ const TemplateForm: React.FC = () => {
       label: `${type.charAt(0).toUpperCase() + type.slice(1)} Label`,
       required: false,
       options: ["dropdown", "checkboxes", "multipleChoice"].includes(type)
-        ? [{ text: "Option 1" }, { text: "Option 2" }]
+        ? [
+            { label: "Option 1", value: "option1" },
+            { label: "Option 2", value: "option2" },
+          ]
         : undefined,
     };
     setFields((prev) => [...prev, newField]);
@@ -90,7 +116,9 @@ const TemplateForm: React.FC = () => {
               ...updatedField,
               id: updatedField.id,
               required: updatedField.required ?? false,
-              options: updatedField.options as FieldOption[],
+              options: updatedField.options?.map((opt) =>
+                typeof opt === "string" ? { label: opt, value: opt } : opt
+              ),
             }
           : f
       )
@@ -174,7 +202,6 @@ const TemplateForm: React.FC = () => {
             </div>
           </div>
 
-          {/* Fields Rendering */}
           {editMode ? (
             <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId="fields-droppable">
@@ -219,17 +246,28 @@ const TemplateForm: React.FC = () => {
               No fields available in this template.
             </div>
           ) : (
-            fields.map((field) => (
-              <FieldRenderer
-                key={field.id}
-                field={field}
-                value={submittedData[field.id]}
-                onChange={(val) => handleInputChange(field.id, val)}
-              />
-            ))
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit();
+              }}
+            >
+              {fields.map((field) => (
+                <FieldRenderer
+                  key={field.id}
+                  field={field}
+                  value={submittedData[field.id]}
+                  onChange={(val) => handleInputChange(field.id, val)}
+                  error={errors[field.id] || false}
+                />
+              ))}
+
+              <button type="submit" className="btn btn-outline-success mt-4">
+                Submit
+              </button>
+            </form>
           )}
 
-          {/* Buttons */}
           {editMode && (
             <div className="mt-4">
               <button
@@ -240,20 +278,7 @@ const TemplateForm: React.FC = () => {
               </button>
             </div>
           )}
-          {!editMode && fields.length > 0 && (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSubmit();
-              }}
-            >
-              <button type="submit" className="btn btn-outline-success mt-4">
-                Submit
-              </button>
-            </form>
-          )}
 
-          {/* Alerts */}
           {showAlert && (
             <div className="alert alert-success mt-4">
               Form submitted and saved!

@@ -1,3 +1,4 @@
+// src/components/FieldRenderer.tsx
 import React from "react";
 import type { Field } from "../types";
 
@@ -14,55 +15,34 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
   value,
   onChange,
   error = false,
-  //darkMode = false,
 }) => {
   const { label } = field;
+
   const renderError = () =>
     error && <small className="text-danger">This field is required.</small>;
 
-  const baseInputClass = `form-control ${error ? "border-danger" : ""}`;
+  const baseInputClass = `form-control ${error ? "is-invalid" : ""}`;
+  const borderCheckClass = `${error ? "border border-danger" : ""}`;
 
   switch (field.type) {
     case "header":
       return (
         <div className="mb-3">
-          <h4
-            contentEditable
-            suppressContentEditableWarning
-            onBlur={(e) => onChange(e.currentTarget.textContent || "")}
-          >
-            {value || label}
-          </h4>
-          <input type="hidden" value={value || label} />
+          <h4>{value || label}</h4>
         </div>
       );
 
     case "label":
       return (
         <div className="mb-3">
-          <label
-            className="form-label fw-bold"
-            contentEditable
-            suppressContentEditableWarning
-            onBlur={(e) => onChange(e.currentTarget.textContent || "")}
-          >
-            {value || label}
-          </label>
-          <input type="hidden" value={value || label} />
+          <label className="form-label fw-bold">{value || label}</label>
         </div>
       );
 
     case "paragraph":
       return (
         <div className="mb-3">
-          <p
-            contentEditable
-            suppressContentEditableWarning
-            onBlur={(e) => onChange(e.currentTarget.textContent || "")}
-          >
-            {value || label}
-          </p>
-          <input type="hidden" value={value || label} />
+          <p>{value || label}</p>
         </div>
       );
 
@@ -108,8 +88,8 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
           >
             <option value="">Select...</option>
             {field.options?.map((opt, i) => (
-              <option key={i} value={opt.text}>
-                {opt.text}
+              <option key={i} value={opt.value}>
+                {opt.label}
               </option>
             ))}
           </select>
@@ -124,24 +104,19 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
           {field.options?.map((opt, i) => (
             <div key={i} className="form-check">
               <input
-                className={`form-check-input ${
-                  error ? "border border-danger" : ""
-                }`}
+                className={`form-check-input ${borderCheckClass}`}
                 type="checkbox"
-                checked={Array.isArray(value) && value.includes(opt.text)}
+                checked={Array.isArray(value) && value.includes(opt.value)}
                 onChange={(e) => {
-                  if (Array.isArray(value)) {
-                    onChange(
-                      e.target.checked
-                        ? [...value, opt.text]
-                        : value.filter((v) => v !== opt.text)
-                    );
+                  const current = Array.isArray(value) ? value : [];
+                  if (e.target.checked) {
+                    onChange([...current, opt.value]);
                   } else {
-                    onChange(e.target.checked ? [opt.text] : []);
+                    onChange(current.filter((v) => v !== opt.value));
                   }
                 }}
               />
-              <label className="form-check-label">{opt.text}</label>
+              <label className="form-check-label">{opt.label}</label>
             </div>
           ))}
           {renderError()}
@@ -155,16 +130,14 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
           {field.options?.map((opt, i) => (
             <div key={i} className="form-check">
               <input
-                className={`form-check-input ${
-                  error ? "border border-danger" : ""
-                }`}
+                className={`form-check-input ${borderCheckClass}`}
                 type="radio"
                 name={`field-${field.id}`}
-                value={opt.text}
-                checked={value === opt.text}
-                onChange={() => onChange(opt.text)}
+                value={opt.value}
+                checked={value === opt.value}
+                onChange={() => onChange(opt.value)}
               />
-              <label className="form-check-label">{opt.text}</label>
+              <label className="form-check-label">{opt.label}</label>
             </div>
           ))}
           {renderError()}
@@ -174,21 +147,32 @@ const FieldRenderer: React.FC<FieldRendererProps> = ({
     case "tags":
       return (
         <div className="mb-3">
-          <label>{field.label}</label>
-          <input
-            type="text"
-            className={baseInputClass}
-            placeholder="Comma-separated tags"
-            value={typeof value === "string" ? value : ""}
-            onChange={(e) =>
-              onChange(
-                e.target.value
-                  .split(",")
-                  .map((tag) => tag.trim())
-                  .filter((tag) => tag !== "")
-              )
-            }
-          />
+          <label className="form-label d-block">{label}</label>
+          <div className="d-flex flex-wrap gap-2">
+            {field.options?.map((opt, idx) => {
+              const selected =
+                Array.isArray(value) && value.includes(opt.value);
+              return (
+                <span
+                  key={idx}
+                  className={`badge rounded-pill px-3 py-2 ${
+                    selected ? "bg-primary" : "bg-secondary"
+                  }`}
+                  style={{ cursor: "pointer" }}
+                  onClick={() => {
+                    const current = Array.isArray(value) ? value : [];
+                    if (selected) {
+                      onChange(current.filter((v) => v !== opt.value));
+                    } else {
+                      onChange([...current, opt.value]);
+                    }
+                  }}
+                >
+                  {opt.label}
+                </span>
+              );
+            })}
+          </div>
           {renderError()}
         </div>
       );

@@ -21,7 +21,8 @@ export interface Field {
 }
 
 export interface FieldOption {
-  text: string;
+ label: string;
+  value: string;
 }
 
 export interface FieldConfig {

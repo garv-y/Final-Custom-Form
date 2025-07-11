@@ -1,5 +1,5 @@
-// src/components/FormBuilder.tsx
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import FieldBuilder from "./FieldBuilder";
 import FieldRenderer from "./FieldRenderer";
 import { useTheme } from "./ThemeContext";
@@ -7,9 +7,12 @@ import type { FieldConfig, FieldType } from "../types";
 
 const FormBuilder: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
+
   const [formTitle, setFormTitle] = useState("My Custom Form");
   const [fields, setFields] = useState<FieldConfig[]>([]);
   const [formResponses, setFormResponses] = useState<Record<string, any>>({});
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [submittedData, setSubmittedData] = useState<Record<
     string,
     any
@@ -32,7 +35,10 @@ const FormBuilder: React.FC = () => {
       options: ["dropdown", "tags", "checkboxes", "multipleChoice"].includes(
         type
       )
-        ? [{ text: "Option 1" }, { text: "Option 2" }]
+        ? [
+            { label: "Option 1", value: "option_1" },
+            { label: "Option 2", value: "option_2" },
+          ]
         : undefined,
     };
     setFields((prev) => [...prev, newField]);
@@ -48,21 +54,50 @@ const FormBuilder: React.FC = () => {
     setFields((prev) => prev.filter((f) => f.id !== id));
   };
 
-  const handleResponseChange = (id: string, value: any) => {
-    setFormResponses((prev) => ({ ...prev, [id]: value }));
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const newErrors: Record<string, boolean> = {};
     const result: Record<string, any> = {};
+
     fields.forEach((field) => {
       if (!useShortForm || field.displayOnShortForm) {
         const value = formResponses[field.id];
+
+        const isEmpty =
+          value === undefined ||
+          value === "" ||
+          (Array.isArray(value) && value.length === 0);
+
+        if (field.required && isEmpty) {
+          newErrors[field.id] = true;
+        }
+
         result[field.label || `Field ${field.id}`] = value;
       }
     });
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     setSubmittedData(result);
     localStorage.setItem("submittedData", JSON.stringify(result));
+
+    const newEntry = {
+      id: Date.now().toString(),
+      title: formTitle,
+      timestamp: new Date().toISOString(),
+      responses: result,
+      fields,
+    };
+
+    const existing = JSON.parse(localStorage.getItem("recentForms") || "[]");
+    localStorage.setItem(
+      "recentForms",
+      JSON.stringify([newEntry, ...existing])
+    );
   };
 
   return (
@@ -70,15 +105,25 @@ const FormBuilder: React.FC = () => {
       {/* Left Builder Section */}
       <div className="container mt-4 flex-grow-1">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h3>Form Builder</h3>
-          <button
-            className={`btn ${
-              theme === "dark" ? "btn-outline-light" : "btn-outline-dark"
-            }`}
-            onClick={toggleTheme}
-          >
-            Switch to {theme === "light" ? "Dark" : "Light"} Theme
-          </button>
+          <h3 className="mb-0">Form Builder</h3>
+          <div className="d-flex gap-2 ms-auto">
+            <button
+              className={`btn ${
+                theme === "dark" ? "btn-outline-light" : "btn-outline-dark"
+              }`}
+              onClick={toggleTheme}
+            >
+              Switch to {theme === "light" ? "Dark" : "Light"} Theme
+            </button>
+            <button
+              className={`btn ${
+                theme === "dark" ? "btn-outline-light" : "btn-outline-dark"
+              }`}
+              onClick={() => navigate("/")}
+            >
+              Back to Dashboard
+            </button>
+          </div>
         </div>
 
         <div className="mb-4">
@@ -137,8 +182,11 @@ const FormBuilder: React.FC = () => {
                   key={f.id}
                   field={f}
                   value={formResponses[f.id]}
-                  onChange={(val) => handleResponseChange(f.id, val)}
-                  darkMode={theme === "dark"}
+                  onChange={(val) => {
+                    setFormResponses((prev) => ({ ...prev, [f.id]: val }));
+                    setErrors((prev) => ({ ...prev, [f.id]: false }));
+                  }}
+                  error={errors[f.id] || false}
                 />
               ))}
             <button
@@ -162,12 +210,12 @@ const FormBuilder: React.FC = () => {
         )}
       </div>
 
-      {/* Right Sidebar Toolbox */}
+      {/* Right Toolbox Sidebar */}
       <div
         className="toolbox-sidebar border-start p-3 dark-bg-card form-preview"
         style={{ width: "250px" }}
       >
-        <h5 className="mb-3 text">Toolbox</h5>
+        <h5 className="mb-3">Toolbox</h5>
         <ul className="list-unstyled">
           {[
             "header",
@@ -183,7 +231,7 @@ const FormBuilder: React.FC = () => {
           ].map((type) => (
             <li key={type}>
               <button
-                className={`btn w-100 mb-2 ${
+                className={`btn w-100 mb-2 shadow-sm form-preview ${
                   theme === "dark"
                     ? "bg-dark-soft text-white"
                     : "bg-white text-dark"

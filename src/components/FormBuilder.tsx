@@ -194,7 +194,11 @@ const FormBuilder: React.FC = () => {
         </div>
 
         {/* Live Preview Section */}
-        <div className="p-4 border rounded shadow-sm bg-dark form-preview">
+        <div
+          className={`card shadow-sm border-0 p-4 border rounded form-preview ${
+            theme === "dark" ? "bg-dark text-white" : "bg-white text-dark"
+          }`}
+        >
           <h4 className="mb-3">Live Preview</h4>
           <h5>{formTitle}</h5>
           <form onSubmit={handleSubmit}>
